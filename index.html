@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Exploratory sRAPID prognostic index for pleural infection based on reported Cox proportional hazards ratios">
-    <meta name="keywords" content="pleural infection, sRAPID, prognostic index, Cox regression">
+    <meta name="description" content="Nomogram-based sRAPID calculator for estimated 3-month mortality in pleural infection">
+    <meta name="keywords" content="pleural infection, sRAPID, nomogram, 3-month mortality">
     <meta name="author" content="Clinical Research Team">
     <meta property="og:title" content="sRAPID Prognostic Index for Pleural Infection">
-    <meta property="og:description" content="Estimate relative 3-month mortality hazard using the exploratory sRAPID model">
+    <meta property="og:description" content="Estimate 3-month mortality using the sRAPID nomogram">
     <meta property="og:type" content="website">
     <title>sRAPID Prognostic Index | Pleural Infection</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -624,7 +624,7 @@
             </div>
             <div>
                 <h1 class="title">sRAPID Prognostic Index for Pleural Infection</h1>
-                <p class="subtitle">Relative 3-Month Mortality Hazard • Exploratory Cox Model</p>
+                <p class="subtitle">Nomogram-Based 3-Month Mortality Estimate</p>
             </div>
         </div>
     </header>
@@ -633,7 +633,7 @@
         <!-- Input Card -->
         <div class="card">
             <h2 class="card-title">Patient Parameters</h2>
-            <p class="card-desc">Enter clinical values to calculate the prognostic index and mortality hazard relative to the reference profile</p>
+            <p class="card-desc">Enter the four variables used in Figure 4 to calculate nomogram points and estimated 3-month mortality</p>
 
             <div class="form-grid">
                 <!-- Age -->
@@ -642,8 +642,8 @@
                         <span class="label-text">Age</span>
                         <span class="label-unit">years</span>
                     </label>
-                    <input type="number" id="age" placeholder="e.g., 65" min="18" max="120" inputmode="numeric">
-                    <span class="error-text" id="age-error">Please enter age between 18-120 years</span>
+                    <input type="number" id="age" placeholder="e.g., 65" min="10" max="100" inputmode="numeric">
+                    <span class="error-text" id="age-error">Please enter age between 10-100 years (nomogram range)</span>
                 </div>
 
                 <!-- Urea -->
@@ -662,8 +662,8 @@
                         <span class="label-text">Serum Albumin</span>
                         <span class="label-unit">g/L</span>
                     </label>
-                    <input type="number" id="albumin" placeholder="e.g., 35" step="0.1" min="10" max="60" inputmode="decimal">
-                    <span class="error-text" id="albumin-error">Please enter value between 10-60 g/L</span>
+                    <input type="number" id="albumin" placeholder="e.g., 35" step="0.1" min="0" max="70" inputmode="decimal">
+                    <span class="error-text" id="albumin-error">Please enter value between 0-70 g/L (nomogram range)</span>
                 </div>
 
                 <!-- Infection Source -->
@@ -692,7 +692,7 @@
                         <circle cx="12" cy="12" r="10"/>
                         <path d="M12 6v6l4 2"/>
                     </svg>
-                    Calculate Index
+                    Calculate Risk
                 </button>
                 <button class="btn-secondary" onclick="resetForm()">Reset</button>
             </div>
@@ -707,8 +707,8 @@
                     Model Information
                 </div>
                 <div class="model-formula">
-                    LP = ln(1.06)×Age + ln(1.04)×Urea + ln(0.95)×Albumin + ln(1.96)×HAPI<br>
-                    Relative hazard = exp(LP − LP<sub>reference</sub>)
+                    Total points = Age points + Urea points + Albumin points + Infection-source points<br>
+                    3-month mortality = 1 − exp[−exp(−7.31477 + 0.0530107 × Total points)]
                 </div>
                 <div class="model-stats">
                     <div class="model-stat">
@@ -731,7 +731,7 @@
         <div class="card result-card" id="result-card">
             <div class="result-header">
                 <h2 class="card-title">Prediction Results</h2>
-                <div class="risk-badge" id="risk-badge">Exploratory Result</div>
+                <div class="risk-badge" id="risk-badge">Nomogram Estimate</div>
             </div>
 
             <div class="result-main">
@@ -742,21 +742,21 @@
                             <circle class="progress-ring-fill" id="progress-fill" cx="50" cy="50" r="45"/>
                         </svg>
                         <div class="survival-value">
-                            <span class="survival-number" id="survival-number">0.00</span>
-                            <span class="survival-percent">×</span>
+                            <span class="survival-number" id="survival-number">0.0</span>
+                            <span class="survival-percent">%</span>
                         </div>
                     </div>
-                    <p class="survival-label">Relative Mortality Hazard</p>
+                    <p class="survival-label">Estimated 3-Month Mortality</p>
                 </div>
 
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <span class="stat-value" id="mortality-prob">Reference</span>
-                        <span class="stat-label">Comparison Profile</span>
+                        <span class="stat-value" id="mortality-prob">0.0</span>
+                        <span class="stat-label">Total Nomogram Points</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value" id="linear-predictor">0.000</span>
-                        <span class="stat-label">Linear Predictor</span>
+                        <span class="stat-value" id="linear-predictor">100.0%</span>
+                        <span class="stat-label">Estimated 3-Month Survival</span>
                     </div>
                 </div>
             </div>
@@ -764,7 +764,7 @@
             <div class="interpretation">
                 <h3 class="interpret-title">Clinical Interpretation</h3>
                 <p class="interpret-text" id="interpret-text">
-                    Based on the exploratory sRAPID Cox model...
+                    Based on the sRAPID nomogram shown in Figure 4...
                 </p>
             </div>
         </div>
@@ -772,9 +772,8 @@
 
     <footer>
         <p class="disclaimer">
-            <strong>Disclaimer:</strong> This exploratory tool is based on rounded hazard ratios reported from an internally validated model. 
-            It estimates relative hazard rather than absolute mortality probability, has not undergone independent external validation, 
-            and should not be used as the sole basis for clinical decision-making.
+            <strong>Disclaimer:</strong> This research calculator reproduces the point and 3-month mortality scales shown in Figure 4. 
+            The model has undergone internal but not independent external validation and should not be used as the sole basis for clinical decision-making.
         </p>
         <p class="footer-note">
             Development cohort: n=1,344 • 153 deaths • C-statistic: 0.87
@@ -783,22 +782,20 @@
 
     <script>
         // ============================================================
-        // Model coefficients calculated from the multivariable HRs reported in the manuscript.
-        // These rounded published HRs support relative-hazard estimation, not absolute survival probability.
+        // Point conversion and outcome scale reproduced from the published Figure 4 nomogram.
+        // Pixel positions of all 13 labelled mortality ticks (.01-.99) follow the
+        // complementary log-log relationship below (maximum absolute discrepancy <0.002).
         // ============================================================
         const MODEL = {
-            coef: {
-                age: Math.log(1.06),
-                urea: Math.log(1.04),
-                albumin: Math.log(0.95),
-                hospital: Math.log(1.96)
+            points: {
+                agePerYear: 100 / 90,
+                ureaPerMmol: 76.6826923077 / 100,
+                albuminPerGLost: 65.3846153846 / 70,
+                hospital: 12.7403846154
             },
-            // Explicit clinical reference profile used only to make the relative hazard interpretable.
-            reference: {
-                age: 50,
-                urea: 5,
-                albumin: 35,
-                hospital: 0
+            mortalityScale: {
+                intercept: -7.31476953446,
+                slope: 0.0530107370254
             }
         };
 
@@ -823,7 +820,7 @@
             document.querySelectorAll('.error-text').forEach(el => el.classList.remove('show'));
             document.querySelectorAll('input[type="number"]').forEach(el => el.classList.remove('error'));
 
-            if (!age || age < 18 || age > 120) {
+            if (isNaN(age) || age < 10 || age > 100) {
                 document.getElementById('age-error').classList.add('show');
                 document.getElementById('age').classList.add('error');
                 isValid = false;
@@ -835,7 +832,7 @@
                 isValid = false;
             }
 
-            if (!albumin || albumin < 10 || albumin > 60) {
+            if (isNaN(albumin) || albumin < 0 || albumin > 70) {
                 document.getElementById('albumin-error').classList.add('show');
                 document.getElementById('albumin').classList.add('error');
                 isValid = false;
@@ -853,51 +850,48 @@
             const albumin = parseFloat(document.getElementById('albumin').value);
             const isHospital = document.querySelector('input[name="infection"]:checked').value === 'hospital' ? 1 : 0;
 
-            // LP = β1*Age + β2*Urea + β3*Albumin + β4*Hospital
-            const lp = MODEL.coef.age * age + 
-                       MODEL.coef.urea * urea + 
-                       MODEL.coef.albumin * albumin + 
-                       MODEL.coef.hospital * isHospital;
+            const agePoints = (age - 10) * MODEL.points.agePerYear;
+            const ureaPoints = urea * MODEL.points.ureaPerMmol;
+            const albuminPoints = (70 - albumin) * MODEL.points.albuminPerGLost;
+            const infectionPoints = isHospital ? MODEL.points.hospital : 0;
+            const totalPoints = agePoints + ureaPoints + albuminPoints + infectionPoints;
+            const cloglog = MODEL.mortalityScale.intercept + MODEL.mortalityScale.slope * totalPoints;
+            const mortality = 1 - Math.exp(-Math.exp(cloglog));
 
-            const lpReference = MODEL.coef.age * MODEL.reference.age +
-                                MODEL.coef.urea * MODEL.reference.urea +
-                                MODEL.coef.albumin * MODEL.reference.albumin +
-                                MODEL.coef.hospital * MODEL.reference.hospital;
-
-            const relativeHazard = Math.exp(lp - lpReference);
-            updateResults(relativeHazard, lp);
+            updateResults(mortality, totalPoints, { agePoints, ureaPoints, albuminPoints, infectionPoints });
         }
 
-        function updateResults(relativeHazard, lp) {
+        function updateResults(mortality, totalPoints, componentPoints) {
             document.getElementById('result-card').classList.add('show');
 
-            const hazardText = relativeHazard.toFixed(2);
+            const mortalityPercent = mortality * 100;
+            const mortalityText = mortalityPercent.toFixed(1);
             const prognosisColor = '#2563EB';
-            document.getElementById('survival-number').textContent = hazardText;
+            document.getElementById('survival-number').textContent = mortalityText;
             document.getElementById('survival-number').style.color = prognosisColor;
 
             const progressFill = document.getElementById('progress-fill');
             const circumference = 283;
-            const visualFraction = Math.min(relativeHazard / 5, 1);
-            const offset = circumference - (visualFraction * circumference);
+            const offset = circumference - (mortality * circumference);
             progressFill.style.strokeDashoffset = offset;
             progressFill.style.stroke = prognosisColor;
 
-            document.getElementById('mortality-prob').textContent = 'Age 50, urea 5, albumin 35, CAPI';
-            document.getElementById('linear-predictor').textContent = lp.toFixed(3);
+            document.getElementById('mortality-prob').textContent = totalPoints.toFixed(1);
+            document.getElementById('linear-predictor').textContent = ((1 - mortality) * 100).toFixed(1) + '%';
 
             const badge = document.getElementById('risk-badge');
-            badge.textContent = 'Exploratory Result';
+            badge.textContent = 'Nomogram Estimate';
             badge.style.backgroundColor = prognosisColor + '20';
             badge.style.color = prognosisColor;
             badge.style.borderColor = prognosisColor;
 
             document.getElementById('interpret-text').innerHTML = 
-                `Based on the multivariable hazard ratios reported for the exploratory sRAPID model, 
-                this profile has an estimated 3-month mortality hazard of 
-                <strong style="color: ${prognosisColor}">${hazardText} times</strong> that of the reference profile 
-                (age 50 years, urea 5 mmol/L, albumin 35 g/L, community-acquired infection). 
-                This is a relative hazard, not an absolute mortality probability.`;
+                `The four variables contribute ${componentPoints.agePoints.toFixed(1)} age points, 
+                ${componentPoints.ureaPoints.toFixed(1)} urea points, 
+                ${componentPoints.albuminPoints.toFixed(1)} albumin points, and 
+                ${componentPoints.infectionPoints.toFixed(1)} infection-source points. 
+                The total is <strong>${totalPoints.toFixed(1)} points</strong>, corresponding to an estimated 
+                <strong style="color: ${prognosisColor}">${mortalityText}% 3-month mortality</strong> on the Figure 4 nomogram.`;
 
             if (window.innerWidth <= 900) {
                 setTimeout(() => {
