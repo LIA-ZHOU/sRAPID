@@ -633,7 +633,7 @@
         <!-- Input Card -->
         <div class="card">
             <h2 class="card-title">Patient Parameters</h2>
-            <p class="card-desc">Enter the four variables used in Figure 4 to calculate nomogram points and estimated 3-month mortality</p>
+            <p class="card-desc">Enter four clinical variables to calculate the sRAPID score and estimated 3-month mortality</p>
 
             <div class="form-grid">
                 <!-- Age -->
@@ -764,7 +764,7 @@
             <div class="interpretation">
                 <h3 class="interpret-title">Clinical Interpretation</h3>
                 <p class="interpret-text" id="interpret-text">
-                    Based on the sRAPID nomogram shown in Figure 4...
+                    Based on the sRAPID Cox model...
                 </p>
             </div>
         </div>
@@ -772,7 +772,7 @@
 
     <footer>
         <p class="disclaimer">
-            <strong>Disclaimer:</strong> This research calculator uses the fitted Cox coefficients and 3-month baseline survival underlying Figure 4. 
+            <strong>Disclaimer:</strong> This research calculator uses the fitted sRAPID Cox coefficients and 3-month baseline survival. 
             The model has undergone internal but not independent external validation and should not be used as the sole basis for clinical decision-making.
         </p>
         <p class="footer-note">
@@ -782,7 +782,7 @@
 
     <script>
         // ============================================================
-        // Exact Cox model refitted from the analysis data used to generate Figure 4.
+        // Exact Cox model refitted from the analysis dataset.
         // Total-point scaling uses the same 0-100 maximum effect convention as rms::nomogram.
         // ============================================================
         const MODEL = {
@@ -893,7 +893,7 @@
                 ${componentPoints.albuminPoints.toFixed(1)} albumin points, and 
                 ${componentPoints.infectionPoints.toFixed(1)} infection-source points. 
                 The total is <strong>${totalPoints.toFixed(1)} points</strong>, corresponding to an estimated 
-                <strong style="color: ${prognosisColor}">${mortalityText}% 3-month mortality</strong> on the Figure 4 nomogram.`;
+                <strong style="color: ${prognosisColor}">${mortalityText}% 3-month mortality</strong> according to the sRAPID Cox model.`;
 
             if (window.innerWidth <= 900) {
                 setTimeout(() => {
