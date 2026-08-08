@@ -707,12 +707,12 @@
                     Model Information
                 </div>
                 <div class="model-formula">
-                    Total points = Age points + Urea points + Albumin points + Infection-source points<br>
-                    3-month mortality = 1 − exp[−exp(−7.31477 + 0.0530107 × Total points)]
+                    LP = 0.0589289×Age + 0.0405959×Urea − 0.0494406×Albumin + 0.6713133×HAPI<br>
+                    3-month mortality = 1 − 0.98828133<sup>exp(LP)</sup>
                 </div>
                 <div class="model-stats">
                     <div class="model-stat">
-                        <div class="model-stat-value">1,344</div>
+                        <div class="model-stat-value">1,115</div>
                         <div class="model-stat-label">Patients</div>
                     </div>
                     <div class="model-stat">
@@ -720,7 +720,7 @@
                         <div class="model-stat-label">Events</div>
                     </div>
                     <div class="model-stat">
-                        <div class="model-stat-value">0.87</div>
+                        <div class="model-stat-value">0.841</div>
                         <div class="model-stat-label">C-statistic</div>
                     </div>
                 </div>
@@ -772,31 +772,28 @@
 
     <footer>
         <p class="disclaimer">
-            <strong>Disclaimer:</strong> This research calculator reproduces the point and 3-month mortality scales shown in Figure 4. 
+            <strong>Disclaimer:</strong> This research calculator uses the fitted Cox coefficients and 3-month baseline survival underlying Figure 4. 
             The model has undergone internal but not independent external validation and should not be used as the sole basis for clinical decision-making.
         </p>
         <p class="footer-note">
-            Development cohort: n=1,344 • 153 deaths • C-statistic: 0.87
+            Cox model: n=1,115 complete cases • 153 deaths • C-index: 0.841
         </p>
     </footer>
 
     <script>
         // ============================================================
-        // Point conversion and outcome scale reproduced from the published Figure 4 nomogram.
-        // Pixel positions of all 13 labelled mortality ticks (.01-.99) follow the
-        // complementary log-log relationship below (maximum absolute discrepancy <0.002).
+        // Exact Cox model refitted from the analysis data used to generate Figure 4.
+        // Total-point scaling uses the same 0-100 maximum effect convention as rms::nomogram.
         // ============================================================
         const MODEL = {
-            points: {
-                agePerYear: 100 / 90,
-                ureaPerMmol: 76.6826923077 / 100,
-                albuminPerGLost: 65.3846153846 / 70,
-                hospital: 12.7403846154
+            coef: {
+                age: 0.05892887845,
+                urea: 0.04059589740,
+                albumin: -0.04944057049,
+                hospital: 0.67131326743
             },
-            mortalityScale: {
-                intercept: -7.31476953446,
-                slope: 0.0530107370254
-            }
+            baselineSurvival3m: 0.988281329509,
+            maxEffect: 0.05892887845 * 90
         };
 
         // Radio button handling
@@ -850,13 +847,18 @@
             const albumin = parseFloat(document.getElementById('albumin').value);
             const isHospital = document.querySelector('input[name="infection"]:checked').value === 'hospital' ? 1 : 0;
 
-            const agePoints = (age - 10) * MODEL.points.agePerYear;
-            const ureaPoints = urea * MODEL.points.ureaPerMmol;
-            const albuminPoints = (70 - albumin) * MODEL.points.albuminPerGLost;
-            const infectionPoints = isHospital ? MODEL.points.hospital : 0;
+            const pointScale = 100 / MODEL.maxEffect;
+            const agePoints = (age - 10) * MODEL.coef.age * pointScale;
+            const ureaPoints = urea * MODEL.coef.urea * pointScale;
+            const albuminPoints = (70 - albumin) * (-MODEL.coef.albumin) * pointScale;
+            const infectionPoints = isHospital ? MODEL.coef.hospital * pointScale : 0;
             const totalPoints = agePoints + ureaPoints + albuminPoints + infectionPoints;
-            const cloglog = MODEL.mortalityScale.intercept + MODEL.mortalityScale.slope * totalPoints;
-            const mortality = 1 - Math.exp(-Math.exp(cloglog));
+            const lp = MODEL.coef.age * age +
+                       MODEL.coef.urea * urea +
+                       MODEL.coef.albumin * albumin +
+                       MODEL.coef.hospital * isHospital;
+            const survival = Math.pow(MODEL.baselineSurvival3m, Math.exp(lp));
+            const mortality = 1 - survival;
 
             updateResults(mortality, totalPoints, { agePoints, ureaPoints, albuminPoints, infectionPoints });
         }
