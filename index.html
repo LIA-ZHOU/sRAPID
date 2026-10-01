@@ -644,6 +644,7 @@
                     </label>
                     <input type="number" id="age" placeholder="e.g., 65" min="10" max="100" inputmode="numeric">
                     <span class="error-text" id="age-error">Please enter age between 10-100 years (nomogram range)</span>
+                    <span class="label-unit">Nomogram axis: 10–100 years; the study included adults aged ≥18 years.</span>
                 </div>
 
                 <!-- Urea -->
@@ -675,12 +676,12 @@
                         <label class="radio-label active" id="label-community">
                             <input type="radio" name="infection" value="community" checked>
                             <span class="radio-custom"></span>
-                            <span>Community-acquired</span>
+                            <span>Community-acquired (CAPI)</span>
                         </label>
                         <label class="radio-label" id="label-hospital">
                             <input type="radio" name="infection" value="hospital">
                             <span class="radio-custom"></span>
-                            <span>Hospital-acquired</span>
+                            <span>Hospital-acquired (HAPI)</span>
                         </label>
                     </div>
                 </div>
@@ -707,8 +708,9 @@
                     Model Information
                 </div>
                 <div class="model-formula">
-                    LP = 0.0589289×Age + 0.0405959×Urea − 0.0494406×Albumin + 0.6713133×HAPI<br>
-                    3-month mortality = 1 − 0.98828133<sup>exp(LP)</sup>
+                    LP = 0.064168×Age + 0.041207×Urea − 0.037195×Albumin + 0.859986×HAPI<br>
+                    3-month mortality = 1 − 0.9957707<sup>exp(LP)</sup><br>
+                    HAPI = 1; CAPI = 0. Calculations use full-precision model parameters.
                 </div>
                 <div class="model-stats">
                     <div class="model-stat">
@@ -720,8 +722,8 @@
                         <div class="model-stat-label">Events</div>
                     </div>
                     <div class="model-stat">
-                        <div class="model-stat-value">0.87</div>
-                        <div class="model-stat-label">C-statistic</div>
+                        <div class="model-stat-value">0.844</div>
+                        <div class="model-stat-label">Apparent C-index</div>
                     </div>
                 </div>
             </div>
@@ -773,27 +775,30 @@
     <footer>
         <p class="disclaimer">
             <strong>Disclaimer:</strong> This research calculator uses the fitted sRAPID Cox coefficients and 3-month baseline survival. 
-            The model has undergone internal but not independent external validation and should not be used as the sole basis for clinical decision-making.
+            The model was internally validated by bootstrapping and validated in an independent prospective cohort (n=145). This tool is intended for research and educational use only and should not be used as the sole basis for clinical decision-making.
         </p>
         <p class="footer-note">
-            3-month analysis cohort: n=1,344 • 153 deaths • sRAPID C-statistic: 0.87
+            3-month analysis cohort: n=1,344 • 153 deaths • sRAPID apparent C-index: 0.844
         </p>
     </footer>
 
     <script>
         // ============================================================
-        // Exact Cox model refitted from the analysis dataset.
+        // Locked Cox model used in Supplementary Figure S1 (2026 ERJ manuscript).
+        // Full-precision coefficients and uncentered baseline survival from the nomogram source.
+        // HAPI = 1 for hospital-acquired pleural infection, 0 for CAPI. 
+        // Do not subtract a covariate mean from LP.
         // Total-point scaling uses the same 0-100 maximum effect convention as rms::nomogram.
         // ============================================================
         const MODEL = {
             coef: {
-                age: 0.05892887845,
-                urea: 0.04059589740,
-                albumin: -0.04944057049,
-                hospital: 0.67131326743
+                age: 0.0641682570327428,
+                urea: 0.0412074177156961,
+                albumin: -0.0371947245937770,
+                hospital: 0.859986120171446
             },
-            baselineSurvival3m: 0.988281329509,
-            maxEffect: 0.05892887845 * 90
+            baselineSurvival3m: 0.995770680355454,
+            maxEffect: 0.0641682570327428 * 90
         };
 
         // Radio button handling
